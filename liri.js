@@ -102,11 +102,11 @@ switch (firstWord) {
     getTweets();
     break;
   case "spotify-this-song":
-    let songName = process.argv[3];
+    songName = process.argv[3];
     getSong();
     break;
   case "movie-this":
-    let tempName = process.argv[3];
+    tempName = process.argv[3];
     getMovie();
     break;
   case "do-what-it-says":
