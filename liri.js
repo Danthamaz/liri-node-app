@@ -1,13 +1,14 @@
 require("dotenv").config();
-const fs = require('fs');
+const fs = require("fs");
 const keys = require("./keys.js");
 const request = require("request");
 const Twitter = require("twitter");
 const Spotify = require("node-spotify-api");
 const spotify = new Spotify(keys.spotify);
 const client = new Twitter(keys.twitter);
+let firstWord = process.argv[2];
 
-if (process.argv[2] === "my-tweets") {
+let getTweets = function() {
   client.get("statuses/user_timeline.json", { count: 20 }, function(
     error,
     tweets,
@@ -26,10 +27,9 @@ if (process.argv[2] === "my-tweets") {
       tweetNumber++;
     });
   });
-}
+};
 
-if (process.argv[2] === "spotify-this-song") {
-  let songName = process.argv[3];
+let getSong = function() {
   spotify.search({ type: "track", query: songName, limt: 1 }, function(
     err,
     data
@@ -46,10 +46,9 @@ if (process.argv[2] === "spotify-this-song") {
     console.log("Album: " + data.tracks.items[0].album.name);
     console.log("Play track at: " + data.tracks.items[0].external_urls.spotify);
   });
-}
+};
 
-if (process.argv[2] === "movie-this") {
-  let tempName = process.argv[3];
+let getMovie = function() {
   if (tempName === undefined) {
     tempName = "Mr. Nobody";
   }
@@ -73,17 +72,48 @@ if (process.argv[2] === "movie-this") {
       console.log("Actors: " + res.Actors);
     }
   );
+};
+
+let getFile = function() {
+  fs.readFile("./random.txt", "utf8", (err, data) => {
+    if (err) throw err;
+    let firstWord = data.replace(/ .*/, "");
+    let secondWord = data.replace(firstWord, "").trim();
+    switch (firstWord) {
+      case "my-tweets":
+        getTweets();
+        break;
+      case "spotify-this-song":
+        songName = secondWord;
+        getSong();
+        break;
+      case "movie-this":
+        tempName = secondWord;
+        getMovie();
+        break;
+      default:
+        console.log("Invalid command in text file...");
+    }
+  });
+};
+
+switch (firstWord) {
+  case "my-tweets":
+    getTweets();
+    break;
+  case "spotify-this-song":
+    let songName = process.argv[3];
+    getSong();
+    break;
+  case "movie-this":
+    let tempName = process.argv[3];
+    getMovie();
+    break;
+  case "do-what-it-says":
+    getFile();
+    break;
+  default:
+    console.log(
+      "Invalid command! Please use my-tweets, spotify-this-song, or movie-this."
+    );
 }
-if (process.argv[2] === "do-what-it-says") {
-    fs.readFile('./random.txt', 'utf8', (err, data) => {
-        if (err) throw err;
-        console.log(data);
-
-        var firstWord = data.replace(/ .*/,'');
-        console.log(firstWord);
-
-        // Make previous if statements into functions to be called easier
-        // split name by ""
-      });
-}
-
